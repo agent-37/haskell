@@ -22,6 +22,7 @@ module Complex where
   (/) (Complex real1 im1) (Complex real2 im2) = Complex ((real1*real2 + im1*im2 )/(real2*real2 + im2*im2)) ((im1*real2 - real1*im2 )/(real2*real2 + im2*im2))
   fromRational real = Complex (fromRational real) 0
 
+
  instance Ord Complex where
   compare   (Complex real1 im1)  (Complex real2 im2) = if real1 < real2 then  LT else if (real1 == real2) then EQ else GT
   (<) (Complex real1 im1)  (Complex real2 im2) = if real1 < real2 then True else False
