@@ -88,3 +88,18 @@ buf_fib = [1,1]
 ff n  vec = if n >= last vec  then ff n (vec ++ [(last vec) + (last(init vec))]) else vec
 
 fib nn = ff nn buf_fib
+
+
+
+
+ans = []
+
+parss pos cur vec ans_mas = if pos== (length vec) 
+                            then ans_mas 
+                            else if length ans_mas == 0 
+                                 then (parss (pos+1) cur vec [[cur]]) 
+                                 else if cur == vec !!pos 
+                                      then  (parss (pos+1) cur vec  ( (init ans_mas) ++ ([(last ans_mas)++[vec !!pos]]) )  ) 
+                                      else  (parss (pos+1) (vec !!pos) vec ans_mas++[[cur]]) 
+
+parse vec = parss 0 (vec !!0) vec ans
