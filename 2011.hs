@@ -1,5 +1,6 @@
 import System.IO
 import Data.List (intercalate)
+import Control.Exception (catch, SomeException)
 
 type Matrix = [[Char]]
 
@@ -49,6 +50,38 @@ replaceAtCol x col newChar =
 
 isMatrixFilled = all (all (== '*'))
 
+getValidPosition :: Int -> Int -> IO (Int, Int)
+getValidPosition maxRows maxCols = do
+    putStrLn "Введите позицию (две целых числа через пробел):"
+    pos <- getLine
+    let inputs = words pos
+    if length inputs /= 2
+        then do
+            putStrLn "Ошибка: необходимо ввести два числа."
+            getValidPosition maxRows maxCols
+        else do
+            let [rowStr, colStr] = inputs
+            case (reads rowStr :: [(Int, String)], reads colStr :: [(Int, String)]) of
+                ([(row, "")], [(col, "")]) -> 
+                    if row < 0 || row >= maxRows || col < 0 || col >= maxCols
+                        then do
+                            putStrLn $ "Ошибка: числа должны быть в диапазоне от 0 до " ++ show (maxRows - 1) ++ " и от 0 до " ++ show (maxCols - 1) ++ "."
+                            getValidPosition maxRows maxCols
+                        else return (row, col)
+                _ -> do
+                    putStrLn "Ошибка: необходимо ввести два целых числа."
+                    getValidPosition maxRows maxCols
+
+getValidDirection :: IO Char
+getValidDirection = do
+    putStrLn "Введите символ направления ('g' или 'w'):"
+    direction <- getLine
+    if length direction /= 1 || (head direction /= 'g' && head direction /= 'w')
+        then do
+            putStrLn "Ошибка: необходимо ввести 'g' или 'w'."
+            getValidDirection
+        else return (head direction)
+
 main :: IO ()
 main = do
     let filePath = "input.txt"
@@ -58,17 +91,13 @@ main = do
             if isMatrixFilled currentMatrix
                 then putStrLn "Поздравляем!"
                 else do
-                    putStrLn "Введите символ:"
-                    direction <- getLine
-                    putStrLn "Введите позицию:"
-                    pos <- getLine
-                    let [rowStr, colStr] = words pos
-                        row = read rowStr
-                        col = read colStr
+                    direction <- getValidDirection
+                    let maxRows = length currentMatrix
+                    let maxCols = length (head currentMatrix)
+                    (row, col) <- getValidPosition maxRows maxCols
                     putStrLn "Введите строку для поиска:"
                     searchString <- getLine
-                    let dir = head direction
-                    (newMatrix, found) <- checkAndReplace currentMatrix searchString row col dir
+                    (newMatrix, found) <- checkAndReplace currentMatrix searchString row col direction
                     writeMatrix filePath newMatrix
                     printMatrix newMatrix
                     if found
